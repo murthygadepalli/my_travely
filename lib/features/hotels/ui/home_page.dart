@@ -113,6 +113,29 @@ class _HomePageState extends State<HomePage> {
     _hotelBloc.add(LoadHotels(body));
   }
 
+  // void _onSearchChanged(String value) async {
+  //   setState(() {
+  //     _searchQuery = value;
+  //     _isSearching = true;
+  //   });
+  //
+  //   if (value.isEmpty) {
+  //     setState(() {
+  //       _suggestions = [];
+  //       _isSearching = false;
+  //     });
+  //     return;
+  //   }
+  //
+  //   final results =
+  //   await _hotelBloc.repository.fetchAutoComplete(value.trim());
+  //   setState(() {
+  //     _suggestions = results;
+  //     _isSearching = false;
+  //   });
+  // }
+
+
   void _onSearchChanged(String value) async {
     setState(() {
       _searchQuery = value;
@@ -124,16 +147,19 @@ class _HomePageState extends State<HomePage> {
         _suggestions = [];
         _isSearching = false;
       });
+
+      // 🧹 Clear the search results and reload the default hotel list
+      _loadHotels();
       return;
     }
 
-    final results =
-    await _hotelBloc.repository.fetchAutoComplete(value.trim());
+    final results = await _hotelBloc.repository.fetchAutoComplete(value.trim());
     setState(() {
       _suggestions = results;
       _isSearching = false;
     });
   }
+
 
   void _onSuggestionTap(Map<String, dynamic> item) async {
     FocusScope.of(context).unfocus(); // dismiss keyboard
@@ -179,8 +205,157 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Future<void> _openFilterSheet() async {
+  //   String tempEntityType = _selectedEntityType;
+  //   String tempSearchType = _selectedSearchType;
+  //   String? tempCountry = _country;
+  //   String? tempState = _state;
+  //   String? tempCity = _city;
+  //
+  //   await showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     backgroundColor: Color(0xFFFFF8EC),
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+  //     ),
+  //     enableDrag: false,
+  //     builder: (context) {
+  //       return DraggableScrollableSheet(
+  //         expand: false,
+  //         initialChildSize: 0.75,
+  //         builder: (context, scrollController) {
+  //           return Padding(
+  //             padding: const EdgeInsets.all(16.0),
+  //             child: SingleChildScrollView(
+  //               controller: scrollController,
+  //               child: Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   Center(
+  //                     child: Container(
+  //                       height: 5,
+  //                       width: 50,
+  //                       margin: const EdgeInsets.only(bottom: 20),
+  //                       decoration: BoxDecoration(
+  //                         color: Colors.grey[300],
+  //                         borderRadius: BorderRadius.circular(10),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                   Center(
+  //                     child: const Text("Filter Options",
+  //                         style: TextStyle(
+  //                             fontSize: 20, fontWeight: FontWeight.w700)),
+  //                   ),
+  //                   const SizedBox(height: 20),
+  //                   Padding(
+  //                     padding: const EdgeInsets.only(left: 10.0,bottom: 10),
+  //                     child: const Text("Entity Type",
+  //                         style: TextStyle(fontWeight: FontWeight.w600)),
+  //                   ),
+  //                   DropdownButtonFormField<String>(
+  //                     value: tempEntityType,
+  //                     decoration: InputDecoration(
+  //                       border: OutlineInputBorder(
+  //                           borderRadius: BorderRadius.circular(12)),
+  //                     ),
+  //                     items: const [
+  //                       'Any',
+  //                       'hotel',
+  //                       'resort',
+  //                       'Home Stay',
+  //                       'Camp_sites/tent',
+  //                     ]
+  //                         .map((e) =>
+  //                         DropdownMenuItem(value: e, child: Text(e)))
+  //                         .toList(),
+  //                     onChanged: (v) => tempEntityType = v!,
+  //                   ),
+  //                   const SizedBox(height: 20),
+  //                   Padding(
+  //                     padding: const EdgeInsets.only(left: 10.0,bottom: 10),
+  //                     child: const Text("Search Type",
+  //                         style: TextStyle(fontWeight: FontWeight.w600)),
+  //                   ),
+  //                   DropdownButtonFormField<String>(
+  //                     value: tempSearchType,
+  //                     decoration: InputDecoration(
+  //                       border: OutlineInputBorder(
+  //                           borderRadius: BorderRadius.circular(12)),
+  //                     ),
+  //                     items: const [
+  //                       'byRandom',
+  //                       'byCountry',
+  //                       'byState',
+  //                       'byCity',
+  //                     ]
+  //                         .map((e) =>
+  //                         DropdownMenuItem(value: e, child: Text(e)))
+  //                         .toList(),
+  //                     onChanged: (v) {
+  //                       setState(() {
+  //                         tempSearchType = v!;
+  //                         tempCountry = null;
+  //                         tempState = null;
+  //                         tempCity = null;
+  //                       });
+  //                     },
+  //                   ),
+  //                   const SizedBox(height: 20),
+  //                   if (tempSearchType != 'byRandom') ...[
+  //                     const Text("Select Location",
+  //                         style: TextStyle(fontWeight: FontWeight.w600)),
+  //                     const SizedBox(height: 10),
+  //                     CSCPicker(
+  //                       showStates: tempSearchType != 'byCountry',
+  //                       showCities: tempSearchType == 'byCity',
+  //                       dropdownDecoration: BoxDecoration(
+  //                         borderRadius: BorderRadius.circular(12),
+  //                         color: Color(0xFF622A39),
+  //                         border: Border.all(color: Color(0xFF622A39)),
+  //                       ),
+  //                       onCountryChanged: (v) => tempCountry = v,
+  //                       onStateChanged: (v) => tempState = v,
+  //                       onCityChanged: (v) => tempCity = v,
+  //                     ),
+  //                   ],
+  //                   const SizedBox(height: 30),
+  //                   ElevatedButton.icon(
+  //                     icon: const Icon(Icons.check_circle_outline),
+  //                     label: const Text("Apply Filters"),
+  //                     style: ElevatedButton.styleFrom(
+  //                       backgroundColor: Color(0xFF622A39),
+  //                       foregroundColor: Color(0xFFFFF8EC),
+  //                       minimumSize: const Size(double.infinity, 48),
+  //                       shape: RoundedRectangleBorder(
+  //                           borderRadius: BorderRadius.circular(12)),
+  //                     ),
+  //                     onPressed: () {
+  //                       setState(() {
+  //                         _selectedEntityType = tempEntityType;
+  //                         _selectedSearchType = tempSearchType;
+  //                         _country = tempCountry;
+  //                         _state = tempState;
+  //                         _city = tempCity;
+  //                       });
+  //                       Navigator.pop(context);
+  //                       _loadHotels();
+  //                     },
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
 
   Future<void> _openFilterSheet() async {
+    // Initialize temp variables ONCE, outside builder
     String tempEntityType = _selectedEntityType;
     String tempSearchType = _selectedSearchType;
     String? tempCountry = _country;
@@ -190,199 +365,245 @@ class _HomePageState extends State<HomePage> {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFFFFF8EC),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      backgroundColor: const Color(0xFFFFF8EC),
+
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Top Handle
-                  Container(
-                    height: 5,
-                    width: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Title
-                  const Text(
-                    "Filter Your Stay",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF622A39),
-                      fontFamily: "Poppins",
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Entity Type
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Entity Type",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
-                        fontFamily: "Poppins",
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: tempEntityType,
-                    dropdownColor: const Color(0xFFFFF8EC),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xFFFFF8EC),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFF622A39), width: 1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFF622A39), width: 2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    items: const [
-                      'Any',
-                      'hotel',
-                      'resort',
-                      'Home Stay',
-                      'Camp_sites/tent',
-                    ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                    onChanged: (v) => setModalState(() => tempEntityType = v!),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Search Type
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Search Type",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
-                        fontFamily: "Poppins",
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: tempSearchType,
-                    dropdownColor: const Color(0xFFFFF8EC),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xFFFFF8EC),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFF622A39), width: 1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFF622A39), width: 2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    items: const [
-                      'byRandom',
-                      'byCountry',
-                      'byState',
-                      'byCity',
-                    ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                    onChanged: (v) {
-                      setModalState(() {
-                        tempSearchType = v!;
-                        tempCountry = null;
-                        tempState = null;
-                        tempCity = null;
-                      });
-                    },
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Location Picker (Conditional)
-                  if (tempSearchType != 'byRandom') ...[
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Select Location",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade800,
-                          fontFamily: "Poppins",
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    CSCPicker(
-                      key: ValueKey(tempSearchType),
-                      showStates: tempSearchType != 'byCountry',
-                      showCities: tempSearchType == 'byCity',
-
-                      // 🎨 Custom Theme for all dropdowns
-                      dropdownDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: const Color(0xFFFFF8EC),
-                        border: Border.all(color: const Color(0xFF622A39), width: 1.2),
-                      ),
-                      disabledDropdownDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: const Color(0xFFFFF8EC),
-                        border: Border.all(color: Colors.grey.shade400),
-                      ),
-
-                      selectedItemStyle: const TextStyle(
-                        color: Color(0xFF622A39),
-                        fontFamily: "Poppins",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      dropdownHeadingStyle: const TextStyle(
-                        color: Color(0xFF622A39),
-                        fontFamily: "Poppins",
-                        fontWeight: FontWeight.bold,
-                      ),
-
-                      onCountryChanged: (value) {
-                        setModalState(() {
-                          tempCountry = value;
-                          tempCity = null;
-                        });
-                      },
-                      onStateChanged: (value) {
-                        setModalState(() {
-                          tempState = value;
-                          tempCity = null;
-                        });
-                      },
-                      onCityChanged: (value) => setModalState(() => tempCity = value),
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "Filter Options",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
-                  ],
 
-                  // Apply Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
+
+
+                    // ───────────── Entity Type ─────────────
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Entity Type",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF4A4A4A),
+                              fontFamily: "Poppins",
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            child: DropdownButtonFormField<String>(
+                              value: tempEntityType,
+                              dropdownColor: const Color(0xFFFFF8EC),
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: const Color(0xFFFFF8EC),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Color(0xFF622A39), width: 1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Color(0xFF622A39), width: 2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF622A39)),
+                              style: const TextStyle(
+                                color: Color(0xFF622A39),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14,
+                              ),
+                              items: const [
+                                'Any',
+                                'hotel',
+                                'resort',
+                                'Home Stay',
+                                'Camp_sites/tent',
+                              ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                              onChanged: (v) => setModalState(() => tempEntityType = v!),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+// ───────────── Search Type ─────────────
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Search Type",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF4A4A4A),
+                              fontFamily: "Poppins",
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            child: DropdownButtonFormField<String>(
+                              value: tempSearchType,
+                              dropdownColor: const Color(0xFFFFF8EC),
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: const Color(0xFFFFF8EC),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Color(0xFF622A39), width: 1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Color(0xFF622A39), width: 2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF622A39)),
+                              style: const TextStyle(
+                                color: Color(0xFF622A39),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14,
+                              ),
+                              items: const [
+                                'byRandom',
+                                'byCountry',
+                                'byState',
+                                'byCity',
+                              ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                              onChanged: (v) {
+                                setModalState(() {
+                                  tempSearchType = v!;
+                                  tempCountry = null;
+                                  tempState = null;
+                                  tempCity = null;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+
+                    // ENTITY TYPE (independent)
+                    // const Text("Entity Type", style: TextStyle(fontWeight: FontWeight.w600)),
+                    // DropdownButtonFormField<String>(
+                    //   dropdownColor: const Color(0xFFFFF8EC), // Dropdown menu background
+                    //
+                    //   value: tempEntityType,
+                    //   items: const [
+                    //     'Any',
+                    //     'hotel',
+                    //     'resort',
+                    //     'Home Stay',
+                    //     'Camp_sites/tent',
+                    //   ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                    //   onChanged: (v) {
+                    //     setModalState(() => tempEntityType = v!);
+                    //   },
+                    // ),
+                    //
+                    // const SizedBox(height: 20),
+                    //
+                    // // SEARCH TYPE
+                    // const Text("Search Type", style: TextStyle(fontWeight: FontWeight.w600)),
+                    // DropdownButtonFormField<String>(
+                    //   dropdownColor: const Color(0xFFFFF8EC), // Dropdown menu background
+                    //
+                    //   value: tempSearchType,
+                    //   items: const [
+                    //     'byRandom',
+                    //     'byCountry',
+                    //     'byState',
+                    //     'byCity',
+                    //   ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                    //   onChanged: (v) {
+                    //     setModalState(() {
+                    //       tempSearchType = v!;
+                    //       // Reset dependent fields
+                    //       tempCountry = null;
+                    //       tempState = null;
+                    //       tempCity = null;
+                    //     });
+                    //   },
+                    // ),
+
+                    const SizedBox(height: 20),
+
+                    // CSC PICKER - Conditional Fields
+                    if (tempSearchType != 'byRandom') ...[
+                      const Text("Location Filters", style: TextStyle(fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 10),
+
+                      CSCPicker(
+                        key: ValueKey(tempSearchType), // Keeps selection when search-type changes
+                        showStates: tempSearchType != 'byCountry',
+                        showCities: tempSearchType == 'byCity',
+
+                        // ── OPTIONAL STYLING (you can keep it) ───────────────────────
+                        dropdownDecoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: const Color(0xFFFFF8EC),
+                          border: Border.all(color: Colors.grey.shade400),
+                        ),
+                        disabledDropdownDecoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: const Color(0xFFFFF8EC),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+
+                        onCountryChanged: (value) {
+                          setModalState(() {
+                            tempCountry = value?.split(' ').skip(1).join(' ').trim(); // "India" → "India"                            tempCity = null;
+                          });
+                        },
+                        onStateChanged: (value) {
+                          setModalState(() {
+                            tempState = value;     // value is String?
+                            tempCity = null;
+                          });
+                        },
+                        onCityChanged: (value) {
+                          setModalState(() => tempCity = value); // value is String?
+                        },
+                      ),
+                    ],
+
+                    const SizedBox(height: 24),
+
+                    // APPLY BUTTON
+                    ElevatedButton.icon(
                       onPressed: () {
+                        print("Applying filters:");
+                        print("  Entity: $tempEntityType");
+                        print("  SearchType: $tempSearchType");
+                        print("  Country: $tempCountry");
+                        print("  State: $tempState");
+                        print("  City: $tempCity");
+
+                        // VALIDATION
                         if (tempSearchType == 'byCountry' && tempCountry == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Please select a country.')),
@@ -402,6 +623,7 @@ class _HomePageState extends State<HomePage> {
                           return;
                         }
 
+                        // Apply to main state
                         setState(() {
                           _selectedEntityType = tempEntityType;
                           _selectedSearchType = tempSearchType;
@@ -409,26 +631,21 @@ class _HomePageState extends State<HomePage> {
                           _state = tempState;
                           _city = tempCity;
                         });
+
                         Navigator.pop(context);
                         _loadHotels();
                       },
-                      icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-                      label: const Text(
-                        "Apply Filters",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                      ),
+                      icon: const Icon(Icons.filter,color:Colors.white ,),
+                      label: const Text("Apply Filters",
+                      style: TextStyle(color: Colors.white),),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF622A39),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 3,
-                      ),
+                        minimumSize: const Size(double.infinity, 48),
+                        backgroundColor:  Color(0xFF622A39),
+
+            ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
@@ -436,6 +653,491 @@ class _HomePageState extends State<HomePage> {
       },
     );
   }
+
+
+  // Future<void> _openFilterSheet() async {
+  //   String tempEntityType = _selectedEntityType;
+  //   String tempSearchType = _selectedSearchType;
+  //   String? tempCountry = _country;
+  //   String? tempState = _state;
+  //   String? tempCity = _city;
+  //
+  //   await showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     backgroundColor: const Color(0xFFFFF8EC),
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+  //     ),
+  //     builder: (context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setModalState) {
+  //           return Padding(
+  //             padding: EdgeInsets.only(
+  //               left: 20,
+  //               right: 20,
+  //               top: 20,
+  //               bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+  //             ),
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 // ─────────── Top Drag Handle ───────────
+  //                 Container(
+  //                   height: 5,
+  //                   width: 50,
+  //                   decoration: BoxDecoration(
+  //                     color: Colors.grey.shade300,
+  //                     borderRadius: BorderRadius.circular(12),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //
+  //                 // ─────────── Title ───────────
+  //                 const Text(
+  //                   "Filter Your Stay",
+  //                   style: TextStyle(
+  //                     fontSize: 20,
+  //                     fontWeight: FontWeight.w700,
+  //                     color: Color(0xFF622A39),
+  //                     fontFamily: "Poppins",
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 20),
+  //
+  //                 // ─────────── Entity Type ───────────
+  //                 Align(
+  //                   alignment: Alignment.centerLeft,
+  //                   child: Text(
+  //                     "Entity Type",
+  //                     style: TextStyle(
+  //                       fontWeight: FontWeight.w600,
+  //                       color: Colors.grey.shade800,
+  //                       fontFamily: "Poppins",
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 8),
+  //                 DropdownButtonFormField<String>(
+  //                   value: tempEntityType,
+  //                   dropdownColor: const Color(0xFFFFF8EC),
+  //                   decoration: InputDecoration(
+  //                     filled: true,
+  //                     fillColor: Color(0xFFFFF8EC),
+  //                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+  //                     enabledBorder: OutlineInputBorder(
+  //                       borderSide: const BorderSide(color: Color(0xFF622A39), width: 1),
+  //                       borderRadius: BorderRadius.circular(12),
+  //                     ),
+  //                     focusedBorder: OutlineInputBorder(
+  //                       borderSide: const BorderSide(color: Color(0xFF622A39), width: 2),
+  //                       borderRadius: BorderRadius.circular(12),
+  //                     ),
+  //                   ),
+  //                   items: const [
+  //                     'Any',
+  //                     'hotel',
+  //                     'resort',
+  //                     'Home Stay',
+  //                     'Camp_sites/tent',
+  //                   ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+  //                   onChanged: (v) => setModalState(() => tempEntityType = v!),
+  //                 ),
+  //
+  //                 const SizedBox(height: 20),
+  //
+  //                 // ─────────── Search Type ───────────
+  //                 Align(
+  //                   alignment: Alignment.centerLeft,
+  //                   child: Text(
+  //                     "Search Type",
+  //                     style: TextStyle(
+  //                       fontWeight: FontWeight.w600,
+  //                       color: Colors.grey.shade800,
+  //                       fontFamily: "Poppins",
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 8),
+  //                 DropdownButtonFormField<String>(
+  //                   value: tempSearchType,
+  //                   dropdownColor: const Color(0xFFFFF8EC),
+  //                   decoration: InputDecoration(
+  //                     filled: true,
+  //                     fillColor: Color(0xFFFFF8EC),
+  //                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+  //                     enabledBorder: OutlineInputBorder(
+  //                       borderSide: const BorderSide(color: Color(0xFF622A39), width: 1),
+  //                       borderRadius: BorderRadius.circular(12),
+  //                     ),
+  //                     focusedBorder: OutlineInputBorder(
+  //                       borderSide: const BorderSide(color: Color(0xFF622A39), width: 2),
+  //                       borderRadius: BorderRadius.circular(12),
+  //                     ),
+  //                   ),
+  //                   items: const [
+  //                     'byRandom',
+  //                     'byCountry',
+  //                     'byState',
+  //                     'byCity',
+  //                   ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+  //                   onChanged: (v) {
+  //                     setModalState(() {
+  //                       tempSearchType = v!;
+  //                       tempCountry = null;
+  //                       tempState = null;
+  //                       tempCity = null;
+  //                     });
+  //                   },
+  //                 ),
+  //
+  //                 const SizedBox(height: 20),
+  //
+  //                 // ─────────── Location Picker (Conditional) ───────────
+  //                 if (tempSearchType != 'byRandom') ...[
+  //                   Align(
+  //                     alignment: Alignment.centerLeft,
+  //                     child: Text(
+  //                       "Select Location",
+  //                       style: TextStyle(
+  //                         fontWeight: FontWeight.w600,
+  //                         color: Colors.grey.shade800,
+  //                         fontFamily: "Poppins",
+  //                       ),
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 10),
+  //                   CSCPicker(
+  //                     key: ValueKey(tempSearchType),
+  //                     showStates: tempSearchType != 'byCountry',
+  //                     showCities: tempSearchType == 'byCity',
+  //                     dropdownDecoration: BoxDecoration(
+  //                       borderRadius: BorderRadius.circular(12),
+  //                       color: Color(0xFFFFF8EC),
+  //                       border: Border.all(color: const Color(0xFF622A39)),
+  //                     ),
+  //                     disabledDropdownDecoration: BoxDecoration(
+  //                       borderRadius: BorderRadius.circular(12),
+  //                       color: Colors.grey.shade100,
+  //                       border: Border.all(color: Colors.grey.shade400),
+  //                     ),
+  //                     onCountryChanged: (value) {
+  //                       setModalState(() {
+  //                         tempCountry = value;
+  //                         tempCity = null;
+  //                       });
+  //                     },
+  //                     onStateChanged: (value) {
+  //                       setModalState(() {
+  //                         tempState = value;
+  //                         tempCity = null;
+  //                       });
+  //                     },
+  //                     onCityChanged: (value) => setModalState(() => tempCity = value),
+  //                   ),
+  //                   const SizedBox(height: 20),
+  //                 ],
+  //
+  //                 // ─────────── Apply Filters Button ───────────
+  //                 SizedBox(
+  //                   width: double.infinity,
+  //                   child: ElevatedButton.icon(
+  //                     onPressed: () {
+  //                       if (tempSearchType == 'byCountry' && tempCountry == null) {
+  //                         ScaffoldMessenger.of(context).showSnackBar(
+  //                           const SnackBar(content: Text('Please select a country.')),
+  //                         );
+  //                         return;
+  //                       }
+  //                       if (tempSearchType == 'byState' && (tempCountry == null || tempState == null)) {
+  //                         ScaffoldMessenger.of(context).showSnackBar(
+  //                           const SnackBar(content: Text('Please select country and state.')),
+  //                         );
+  //                         return;
+  //                       }
+  //                       if (tempSearchType == 'byCity' && (tempCountry == null || tempState == null || tempCity == null)) {
+  //                         ScaffoldMessenger.of(context).showSnackBar(
+  //                           const SnackBar(content: Text('Please select country, state, and city.')),
+  //                         );
+  //                         return;
+  //                       }
+  //
+  //                       setState(() {
+  //                         _selectedEntityType = tempEntityType;
+  //                         _selectedSearchType = tempSearchType;
+  //                         _country = tempCountry;
+  //                         _state = tempState;
+  //                         _city = tempCity;
+  //                       });
+  //                       Navigator.pop(context);
+  //                       _loadHotels();
+  //                     },
+  //                     icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+  //                     label: const Text(
+  //                       "Apply Filters",
+  //                       style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+  //                     ),
+  //                     style: ElevatedButton.styleFrom(
+  //                       backgroundColor: const Color(0xFF622A39),
+  //                       foregroundColor: Colors.white,
+  //                       padding: const EdgeInsets.symmetric(vertical: 14),
+  //                       shape: RoundedRectangleBorder(
+  //                         borderRadius: BorderRadius.circular(12),
+  //                       ),
+  //                       elevation: 3,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+  //
+  // Future<void> _openFilterSheet() async {
+  //   String tempEntityType = _selectedEntityType;
+  //   String tempSearchType = _selectedSearchType;
+  //   String? tempCountry = _country;
+  //   String? tempState = _state;
+  //   String? tempCity = _city;
+  //
+  //   await showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     backgroundColor: const Color(0xFFFFF8EC),
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+  //     ),
+  //     builder: (context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setModalState) {
+  //           return Padding(
+  //             padding: EdgeInsets.only(
+  //               left: 20,
+  //               right: 20,
+  //               top: 20,
+  //               bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+  //             ),
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 // ─────────── Top Drag Handle ───────────
+  //                 Container(
+  //                   height: 5,
+  //                   width: 50,
+  //                   decoration: BoxDecoration(
+  //                     color: Colors.grey.shade300,
+  //                     borderRadius: BorderRadius.circular(12),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //
+  //                 // ─────────── Title ───────────
+  //                 const Text(
+  //                   "Filter Your Stay",
+  //                   style: TextStyle(
+  //                     fontSize: 20,
+  //                     fontWeight: FontWeight.w700,
+  //                     color: Color(0xFF622A39),
+  //                     fontFamily: "Poppins",
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 20),
+  //
+  //                 // ─────────── Entity Type ───────────
+  //                 Align(
+  //                   alignment: Alignment.centerLeft,
+  //                   child: Text(
+  //                     "Entity Type",
+  //                     style: TextStyle(
+  //                       fontWeight: FontWeight.w600,
+  //                       color: Colors.grey.shade800,
+  //                       fontFamily: "Poppins",
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 8),
+  //                 DropdownButtonFormField<String>(
+  //                   value: tempEntityType,
+  //                   dropdownColor: const Color(0xFFFFF8EC),
+  //                   decoration: InputDecoration(
+  //                     filled: true,
+  //                     fillColor: Color(0xFFFFF8EC),
+  //                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+  //                     enabledBorder: OutlineInputBorder(
+  //                       borderSide: const BorderSide(color: Color(0xFF622A39), width: 1),
+  //                       borderRadius: BorderRadius.circular(12),
+  //                     ),
+  //                     focusedBorder: OutlineInputBorder(
+  //                       borderSide: const BorderSide(color: Color(0xFF622A39), width: 2),
+  //                       borderRadius: BorderRadius.circular(12),
+  //                     ),
+  //                   ),
+  //                   items: const [
+  //                     'Any',
+  //                     'hotel',
+  //                     'resort',
+  //                     'Home Stay',
+  //                     'Camp_sites/tent',
+  //                   ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+  //                   onChanged: (v) => setModalState(() => tempEntityType = v!),
+  //                 ),
+  //
+  //                 const SizedBox(height: 20),
+  //
+  //                 // ─────────── Search Type ───────────
+  //                 Align(
+  //                   alignment: Alignment.centerLeft,
+  //                   child: Text(
+  //                     "Search Type",
+  //                     style: TextStyle(
+  //                       fontWeight: FontWeight.w600,
+  //                       color: Colors.grey.shade800,
+  //                       fontFamily: "Poppins",
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 8),
+  //                 DropdownButtonFormField<String>(
+  //                   value: tempSearchType,
+  //                   dropdownColor: const Color(0xFFFFF8EC),
+  //                   decoration: InputDecoration(
+  //                     filled: true,
+  //                     fillColor: Color(0xFFFFF8EC),
+  //                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+  //                     enabledBorder: OutlineInputBorder(
+  //                       borderSide: const BorderSide(color: Color(0xFF622A39), width: 1),
+  //                       borderRadius: BorderRadius.circular(12),
+  //                     ),
+  //                     focusedBorder: OutlineInputBorder(
+  //                       borderSide: const BorderSide(color: Color(0xFF622A39), width: 2),
+  //                       borderRadius: BorderRadius.circular(12),
+  //                     ),
+  //                   ),
+  //                   items: const [
+  //                     'byRandom',
+  //                     'byCountry',
+  //                     'byState',
+  //                     'byCity',
+  //                   ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+  //                   onChanged: (v) {
+  //                     setModalState(() {
+  //                       tempSearchType = v!;
+  //                       tempCountry = null;
+  //                       tempState = null;
+  //                       tempCity = null;
+  //                     });
+  //                   },
+  //                 ),
+  //
+  //                 const SizedBox(height: 20),
+  //
+  //                 // ─────────── Location Picker (Conditional) ───────────
+  //                 if (tempSearchType != 'byRandom') ...[
+  //                   Align(
+  //                     alignment: Alignment.centerLeft,
+  //                     child: Text(
+  //                       "Select Location",
+  //                       style: TextStyle(
+  //                         fontWeight: FontWeight.w600,
+  //                         color: Colors.grey.shade800,
+  //                         fontFamily: "Poppins",
+  //                       ),
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 10),
+  //                   CSCPicker(
+  //                     key: ValueKey(tempSearchType),
+  //                     showStates: tempSearchType != 'byCountry',
+  //                     showCities: tempSearchType == 'byCity',
+  //                     dropdownDecoration: BoxDecoration(
+  //                       borderRadius: BorderRadius.circular(12),
+  //                       color: Color(0xFFFFF8EC),
+  //                       border: Border.all(color: const Color(0xFF622A39)),
+  //                     ),
+  //                     disabledDropdownDecoration: BoxDecoration(
+  //                       borderRadius: BorderRadius.circular(12),
+  //                       color: Colors.grey.shade100,
+  //                       border: Border.all(color: Colors.grey.shade400),
+  //                     ),
+  //                     onCountryChanged: (value) {
+  //                       setModalState(() {
+  //                         tempCountry = value;
+  //                         tempCity = null;
+  //                       });
+  //                     },
+  //                     onStateChanged: (value) {
+  //                       setModalState(() {
+  //                         tempState = value;
+  //                         tempCity = null;
+  //                       });
+  //                     },
+  //                     onCityChanged: (value) => setModalState(() => tempCity = value),
+  //                   ),
+  //                   const SizedBox(height: 20),
+  //                 ],
+  //
+  //                 // ─────────── Apply Filters Button ───────────
+  //                 SizedBox(
+  //                   width: double.infinity,
+  //                   child: ElevatedButton.icon(
+  //                     onPressed: () {
+  //                       if (tempSearchType == 'byCountry' && tempCountry == null) {
+  //                         ScaffoldMessenger.of(context).showSnackBar(
+  //                           const SnackBar(content: Text('Please select a country.')),
+  //                         );
+  //                         return;
+  //                       }
+  //                       if (tempSearchType == 'byState' && (tempCountry == null || tempState == null)) {
+  //                         ScaffoldMessenger.of(context).showSnackBar(
+  //                           const SnackBar(content: Text('Please select country and state.')),
+  //                         );
+  //                         return;
+  //                       }
+  //                       if (tempSearchType == 'byCity' && (tempCountry == null || tempState == null || tempCity == null)) {
+  //                         ScaffoldMessenger.of(context).showSnackBar(
+  //                           const SnackBar(content: Text('Please select country, state, and city.')),
+  //                         );
+  //                         return;
+  //                       }
+  //
+  //                       setState(() {
+  //                         _selectedEntityType = tempEntityType;
+  //                         _selectedSearchType = tempSearchType;
+  //                         _country = tempCountry;
+  //                         _state = tempState;
+  //                         _city = tempCity;
+  //                       });
+  //                       Navigator.pop(context);
+  //                       _loadHotels();
+  //                     },
+  //                     icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+  //                     label: const Text(
+  //                       "Apply Filters",
+  //                       style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+  //                     ),
+  //                     style: ElevatedButton.styleFrom(
+  //                       backgroundColor: const Color(0xFF622A39),
+  //                       foregroundColor: Colors.white,
+  //                       padding: const EdgeInsets.symmetric(vertical: 14),
+  //                       shape: RoundedRectangleBorder(
+  //                         borderRadius: BorderRadius.circular(12),
+  //                       ),
+  //                       elevation: 3,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 
 
 
@@ -462,7 +1164,6 @@ class _HomePageState extends State<HomePage> {
             ),
             centerTitle: true,
             backgroundColor: const Color(0xFF622A39),
-            // backgroundColor:  Colors.deepOrange,
             foregroundColor: Colors.white,
             elevation: 2,
 
